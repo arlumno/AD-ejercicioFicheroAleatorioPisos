@@ -11,8 +11,10 @@ package com.mycompany.ejercicioficheroaleatoriopisos;
  */
 public abstract class Piso {
     private String referencia;
+    public static int MAX_SIZE_REFERENCIA = 10;
     private char tipoPiso;
     private String nombrePropietario;
+    public static int MAX_SIZE_PROPIETARIO = 10;
     private float cuotaFija;
     private float aguaCaliente;
     private float cCalefaccion;
