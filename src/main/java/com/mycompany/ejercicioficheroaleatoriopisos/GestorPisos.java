@@ -5,53 +5,90 @@
  */
 package com.mycompany.ejercicioficheroaleatoriopisos;
 
+import ar.csdam.pr.libreriaar.Entradas;
+import ar.csdam.pr.libreriaar.EntradasGui;
 import java.util.ArrayList;
+import java.util.Arrays;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Arsito
  */
 public class GestorPisos {
+
     private ArrayList<Piso> pisos = new ArrayList<Piso>();
+    private GestorArchivosPisos gestorArchivos;
 
     public GestorPisos() {
-        Atico pisoEjemplo01 = new Atico("ejemplo01", "Ana", 10, 20, 30, 40);
-        Duplex pisoEjemplo02 = new Duplex("ejemplo02", "Maria", 10, 20, 30, 40);
-        
         MedirObjeto medirObjeto = new MedirObjeto();
-        
-        /**
-         *  private String referencia;
-            private char tipoPiso;
-            private String nombrePropietario;
-            private float cuotaFija;
-            private float aguaCaliente;
-            private float cCalefaccion;
-            private float totalRecibo;
 
-         */
-        
-        medirObjeto.addProperty(pisoEjemplo01.getTipoPiso());
-        medirObjeto.addProperty(pisoEjemplo01.getReferencia(),Piso.MAX_SIZE_REFERENCIA);
-        medirObjeto.addProperty(pisoEjemplo01.getNombrePropietario(),Piso.MAX_SIZE_PROPIETARIO);
-        medirObjeto.addProperty(pisoEjemplo01.getCuotaFija());
-        medirObjeto.addProperty(pisoEjemplo01.getAguaCaliente());
-        medirObjeto.addProperty(pisoEjemplo01.getcCalefaccion());
-        medirObjeto.addProperty(pisoEjemplo01.getTotalRecibo());  
-               
-        System.out.println("--- inicio ---");
-        System.out.println("--- size ---");
-        System.out.println(medirObjeto.getSize());
-        System.out.println("--- maxSize ---");
-        System.out.println(medirObjeto.getMaxSize());
-        System.out.println("--- guardar.. ---");
-        
-        GestorArchivosPisos gestorArchivos = new GestorArchivosPisos(medirObjeto.getMaxSize());
-        gestorArchivos.addPiso(pisoEjemplo01);
-        int numero = 1; 
-        Piso p = gestorArchivos.leerPiso(5);
-        System.out.println(p.toString());
+        medirObjeto.addChar();
+        medirObjeto.addString(Piso.MAX_SIZE_REFERENCIA);
+        medirObjeto.addString(Piso.MAX_SIZE_PROPIETARIO);
+        medirObjeto.addFloat();
+        medirObjeto.addFloat();
+        medirObjeto.addFloat();
+        medirObjeto.addFloat();
+
+        gestorArchivos = new GestorArchivosPisos(medirObjeto.getMaxSize());
     }
-    
-    
+
+    public void altaPiso() {
+        String referencia = EntradasGui.pedirString("Indica la referencia (max " + Piso.MAX_SIZE_REFERENCIA + " letras", Piso.MAX_SIZE_REFERENCIA);
+        String opcionPiso = EntradasGui.pedirOpcion("Indica el tipo de piso", new ArrayList<>(Arrays.asList("Atico", "Duplex")));
+        String nombrePropietario = EntradasGui.pedirString("Nombre del propietario: ", Piso.MAX_SIZE_PROPIETARIO);
+        float cuotaFija = EntradasGui.pedirFloat("Cuota Fija:");
+        float aguaCaliente = EntradasGui.pedirFloat("Agua Caliente:");
+        float cCalefaccion = EntradasGui.pedirFloat("Calefacción :");
+        Piso piso = null;
+        switch (opcionPiso) {
+            case "Atico":
+                float metrosTerraza = EntradasGui.pedirFloat("Metros Terraza: ");
+                piso = new Atico(referencia, nombrePropietario, cuotaFija, aguaCaliente, cCalefaccion, metrosTerraza);
+                break;
+            case "Duplex":
+                float cuotaExtra = EntradasGui.pedirFloat("Cuota Extra: ");
+                piso = new Duplex(referencia, nombrePropietario, cuotaFija, aguaCaliente, cCalefaccion, cuotaExtra);
+                break;
+        }
+        if (piso != null) {
+            gestorArchivos.addPiso(piso);
+            JOptionPane.showMessageDialog(null, "Piso añadido con éxito");
+        } else {
+            JOptionPane.showMessageDialog(null, "¡¡Error al añadir el piso!!");
+        }
+    }
+
+    public void bajaPiso() {
+        int registro = EntradasGui.pedirInt("Indica el numero de registro. Se pedirá confirmación");
+        Piso piso = gestorArchivos.getPiso(registro);
+        if (EntradasGui.pedirBoolean("Seguro que quieres eliminar el registro " + registro + "\n" + piso.toString())) {
+            gestorArchivos.delPiso(registro);
+            JOptionPane.showMessageDialog(null," --- Piso eliminado con éxito, se han actualizado los registros ---");
+        }
+    }
+
+    public void modPiso() {
+        int registro = EntradasGui.pedirInt("Indica el numero de registro a modificar");
+        Piso piso = gestorArchivos.getPiso(registro);
+        
+        if (EntradasGui.pedirBoolean("Seguro que quieres eliminar el registro " + registro + "\n" + piso.toString())) {            
+            JOptionPane.showMessageDialog(null," --- Piso modificado con éxito ---");
+        }
+    }
+
+    public void listarPisos() {
+        JOptionPane.showMessageDialog(null, gestorArchivos.listarPisos());
+    }
+
+    public void listarRecibos() {
+        JOptionPane.showMessageDialog(null, gestorArchivos.listarRecibos());
+    }
+
+    public void listarPisosPropietario() {
+        String propietario = EntradasGui.pedirString("Nombre de propietario a buscar:");
+        JOptionPane.showMessageDialog(null, gestorArchivos.buscarPisos(propietario));
+    }
+
 }

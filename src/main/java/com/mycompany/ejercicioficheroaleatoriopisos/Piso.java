@@ -61,6 +61,19 @@ public abstract class Piso {
     public void setTotalRecibo(float totalRecibo) {
         this.totalRecibo = totalRecibo;
     }
+
+    @Override
+    public String toString() {
+        String resultado = "-> Ref: " +  referencia
+                         +" | Tipo: " +  tipoPiso
+                         +" | Propietario: " +  nombrePropietario
+                         +" | Cuota Fija: " +  cuotaFija
+                         +" | Agua: " +  aguaCaliente
+                         +" | Calefacción: " +  cCalefaccion;
+      
+        return resultado;
+    }
+    
     
     public abstract float totalRecibo();
     

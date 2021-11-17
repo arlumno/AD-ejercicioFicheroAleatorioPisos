@@ -11,13 +11,14 @@ package com.mycompany.ejercicioficheroaleatoriopisos;
  */
 public class Atico extends Piso{
     private float metrosTerraza;
+    public static char TIPO_PISO = 'A';
 
     public float getMetrosTerraza() {
         return metrosTerraza;
     }
 
     public Atico(String referencia, String nombrePropietario, float cuotaFija, float aguaCaliente, float cCalefaccion, float metrosTerraza) {
-        super(referencia, 'A', nombrePropietario, cuotaFija, aguaCaliente, cCalefaccion);
+        super(referencia, TIPO_PISO, nombrePropietario, cuotaFija, aguaCaliente, cCalefaccion);
         this.metrosTerraza = metrosTerraza;
     }
     
@@ -28,6 +29,11 @@ public class Atico extends Piso{
                 + getcCalefaccion() * 0.7F 
                 + getMetrosTerraza() * 0.45F);
         return getTotalRecibo();
+    }
+
+    @Override
+    public String toString() {        
+        return super.toString() + " | Terraza: " + metrosTerraza;
     }
     
 }

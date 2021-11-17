@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import static java.lang.Math.ceil;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import javax.swing.JOptionPane;
 
 /**
@@ -17,9 +20,10 @@ import javax.swing.JOptionPane;
  */
 public class GestorArchivosPisos {
 
-    private static final String RUTA_FICHEROS = "src/main/java/com/mycompany/ejercicioficheroaleatoriopisos/ficheros/";
-    private static final String NOMBRE_FICHERO = "save.dat";
-    private static final String NOMBRE_FICHERO_TMP = "tmp_save.dat";
+    private final String RUTA_FICHEROS = "src/main/java/com/mycompany/ejercicioficheroaleatoriopisos/ficheros/";
+    private final String NOMBRE_FICHERO = "save.dat";
+    private final String NOMBRE_FICHERO_TMP = "tmp_save.dat";
+    private final String DIA_RECIBOS = "17";
     private long maxSize;
 
     public GestorArchivosPisos(long maxSize) {
@@ -31,11 +35,11 @@ public class GestorArchivosPisos {
         RandomAccessFile raf = null;
         try {
             if (fichero.createNewFile()) {
-                System.out.println("--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
+                JOptionPane.showMessageDialog(null, "--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
             }
             raf = new RandomAccessFile(fichero, "rw");
 
-            int registros = (int) ceil((double) raf.length() / (double) maxSize);
+            int registros = calcularRegistro(raf.length());
             long indice = registros * maxSize;
             grabarPiso(raf, indice, piso);
         } catch (FileNotFoundException e) {
@@ -56,12 +60,10 @@ public class GestorArchivosPisos {
         RandomAccessFile raf = null;
         try {
             if (fichero.createNewFile()) {
-                System.out.println("--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
+                JOptionPane.showMessageDialog(null, "--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
             }
             raf = new RandomAccessFile(fichero, "rw");
-
             grabarPiso(raf, indice, piso);
-
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Error al leer el fichero\n" + e.toString());
         } catch (Exception e) {
@@ -79,14 +81,13 @@ public class GestorArchivosPisos {
         modPiso(piso, (registro - 1) * maxSize);
     }
 
-    public void delPiso(Piso piso, long indiceEliminar) {
+    public void delPiso(long indiceEliminar) {
         File ficheroLectura = new File(RUTA_FICHEROS + NOMBRE_FICHERO);
         File ficheroEscritura = new File(RUTA_FICHEROS + NOMBRE_FICHERO_TMP);
         RandomAccessFile rafR = null;
         RandomAccessFile rafW = null;
         int indiceW = 0;
         if (ficheroLectura.exists()) {
-
             try {
                 rafR = new RandomAccessFile(ficheroLectura, "r");
                 long indiceFinal = rafR.length();
@@ -98,6 +99,10 @@ public class GestorArchivosPisos {
                             indiceW += maxSize;
                         }
                     }
+                    rafR.close();
+                    rafW.close();
+                    ficheroLectura.delete();
+                    ficheroEscritura.renameTo(ficheroLectura);
                 } else {
                     JOptionPane.showMessageDialog(null, "Error el registro a eliminar no existe");
                 }
@@ -117,8 +122,8 @@ public class GestorArchivosPisos {
         }
     }
 
-    public void delPiso(Piso piso, int registro) {
-        delPiso(piso, (registro - 1) * maxSize);
+    public void delPiso(int registro) {
+        delPiso((registro - 1) * maxSize);
     }
 
     /**
@@ -139,12 +144,13 @@ public class GestorArchivosPisos {
         raf.writeFloat(piso.getCuotaFija());
         raf.writeFloat(piso.getAguaCaliente());
         raf.writeFloat(piso.getcCalefaccion());
-        raf.writeFloat(piso.getTotalRecibo());
+//        JOptionPane.showMessageDialog(null, "grabarPiso(): " + piso.toString());
         if (piso instanceof Atico) {
             raf.writeFloat(((Atico) piso).getMetrosTerraza());
         } else if (piso instanceof Duplex) {
             raf.writeFloat(((Duplex) piso).getCuotaExtra());
         }
+
         return indice + maxSize;
     }
 
@@ -152,9 +158,9 @@ public class GestorArchivosPisos {
         Piso piso = null;
         raf.seek(indice);
         char tipo = raf.readChar();
-        if (tipo == 'A') {
+        if (tipo == Atico.TIPO_PISO) {
             piso = new Atico(raf.readUTF(), raf.readUTF(), raf.readFloat(), raf.readFloat(), raf.readFloat(), raf.readFloat());
-        } else if (tipo == 'D') {
+        } else if (tipo == Duplex.TIPO_PISO) {
             piso = new Duplex(raf.readUTF(), raf.readUTF(), raf.readFloat(), raf.readFloat(), raf.readFloat(), raf.readFloat());
         }
         return piso;
@@ -164,14 +170,12 @@ public class GestorArchivosPisos {
         return recuperarPiso(raf, ((registro - 1) * maxSize));
     }
 
-    public Piso leerPiso(long indice) {
+    public Piso getPiso(long indice) {
         File fichero = new File(RUTA_FICHEROS + NOMBRE_FICHERO);
         RandomAccessFile raf = null;
         Piso piso = null;
         try {
             raf = new RandomAccessFile(fichero, "r");
-            System.out.println(indice);
-            System.out.println(raf.length());
             if (indice < raf.length()) {
                 piso = recuperarPiso(raf, indice);
             } else {
@@ -180,7 +184,7 @@ public class GestorArchivosPisos {
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Error al leer el fichero\n" + e.toString());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error en leerPiso(): " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error en getPiso(): " + e.toString());
         } finally {
             try {
                 raf.close();
@@ -191,7 +195,68 @@ public class GestorArchivosPisos {
         return piso;
     }
 
-    public Piso leerPiso(int registro) {
-        return leerPiso(((registro - 1) * maxSize));
+    public Piso getPiso(int registro) {
+        return getPiso(((registro - 1) * maxSize));
+    }
+
+    private String listarPisos(boolean recibo, String filtroPropietario) {
+        StringBuilder listado = new StringBuilder();
+        File fichero = new File(RUTA_FICHEROS + NOMBRE_FICHERO);
+        RandomAccessFile raf = null;
+        Piso piso = null;
+        try {
+            raf = new RandomAccessFile(fichero, "r");
+            if (raf.length() != 0) {
+                for (long i = 0; i < raf.length(); i += maxSize) {
+                    piso = recuperarPiso(raf, i);
+                    if (filtroPropietario == "" || filtroPropietario.toUpperCase().equals(piso.getNombrePropietario().toUpperCase())) {
+                        listado.append("[" + calcularRegistro(i) + "] ");
+                        if (piso.getTipoPiso() == Atico.TIPO_PISO) {
+                            listado.append(((Atico) piso).toString() + "\n");
+                        } else if (piso.getTipoPiso() == Duplex.TIPO_PISO) {
+
+                            listado.append(((Duplex) piso).toString() + "\n");
+                        }
+                        if (recibo) {
+                            listado.append("--- Recibo del Mes :" + piso.totalRecibo() + "€\n");
+                        }
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Error, No hay registros no existe");
+            }
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "Error al leer el fichero\n" + e.toString());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error en listarPisos(): " + e.toString());
+        } finally {
+            try {
+                raf.close();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar el flujo " + e.toString());
+            }
+        }
+        return listado.toString();
+    }
+
+    public String listarPisos() {
+        return listarPisos(false, "");
+    }
+
+    public String listarRecibos() {
+        String resultado = "Error fecha. Los recibos estarán disponibles el día " + DIA_RECIBOS;
+        String diaActual = new SimpleDateFormat("dd").format(Calendar.getInstance().getTime());
+        if (diaActual.equals(DIA_RECIBOS)) {
+            resultado = listarPisos(true, "");
+        }
+        return resultado;
+    }
+
+    public int calcularRegistro(Long indice) {
+        return (int) ceil((double) indice / (double) maxSize);
+    }
+
+    public String buscarPisos(String propietario) {
+        return "Pisos de  " + propietario + ":\n" + listarPisos(false, propietario);
     }
 }
