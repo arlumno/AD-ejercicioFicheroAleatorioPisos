@@ -57,6 +57,26 @@ public abstract class Piso {
     public float getTotalRecibo() {
         return totalRecibo;
     }
+
+    public void setReferencia(String referencia) {
+        this.referencia = referencia;
+    }
+
+    public void setNombrePropietario(String nombrePropietario) {
+        this.nombrePropietario = nombrePropietario;
+    }
+
+    public void setCuotaFija(float cuotaFija) {
+        this.cuotaFija = cuotaFija;
+    }
+
+    public void setAguaCaliente(float aguaCaliente) {
+        this.aguaCaliente = aguaCaliente;
+    }
+
+    public void setcCalefaccion(float cCalefaccion) {
+        this.cCalefaccion = cCalefaccion;
+    }
     
     public void setTotalRecibo(float totalRecibo) {
         this.totalRecibo = totalRecibo;

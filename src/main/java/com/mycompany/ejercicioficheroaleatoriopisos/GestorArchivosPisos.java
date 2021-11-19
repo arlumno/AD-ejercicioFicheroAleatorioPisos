@@ -23,7 +23,7 @@ public class GestorArchivosPisos {
     private final String RUTA_FICHEROS = "src/main/java/com/mycompany/ejercicioficheroaleatoriopisos/ficheros/";
     private final String NOMBRE_FICHERO = "save.dat";
     private final String NOMBRE_FICHERO_TMP = "tmp_save.dat";
-    private final String DIA_RECIBOS = "17";
+    private final String DIA_RECIBOS = "19";
     private long maxSize;
 
     public GestorArchivosPisos(long maxSize) {
@@ -178,7 +178,7 @@ public class GestorArchivosPisos {
             raf = new RandomAccessFile(fichero, "r");
             if (indice < raf.length()) {
                 piso = recuperarPiso(raf, indice);
-            } else {
+            } else {                
                 JOptionPane.showMessageDialog(null, "Error, el registro no existe");
             }
         } catch (FileNotFoundException e) {

@@ -35,7 +35,7 @@ public class GestorPisos {
     }
 
     public void altaPiso() {
-        String referencia = EntradasGui.pedirString("Indica la referencia (max " + Piso.MAX_SIZE_REFERENCIA + " letras", Piso.MAX_SIZE_REFERENCIA);
+        String referencia = EntradasGui.pedirString("Indica la referencia (max " + Piso.MAX_SIZE_REFERENCIA + " letras)", Piso.MAX_SIZE_REFERENCIA);
         String opcionPiso = EntradasGui.pedirOpcion("Indica el tipo de piso", new ArrayList<>(Arrays.asList("Atico", "Duplex")));
         String nombrePropietario = EntradasGui.pedirString("Nombre del propietario: ", Piso.MAX_SIZE_PROPIETARIO);
         float cuotaFija = EntradasGui.pedirFloat("Cuota Fija:");
@@ -63,7 +63,7 @@ public class GestorPisos {
     public void bajaPiso() {
         int registro = EntradasGui.pedirInt("Indica el numero de registro. Se pedirá confirmación");
         Piso piso = gestorArchivos.getPiso(registro);
-        if (EntradasGui.pedirBoolean("Seguro que quieres eliminar el registro " + registro + "\n" + piso.toString())) {
+        if (piso != null && EntradasGui.pedirBoolean("Seguro que quieres eliminar el registro " + registro + "\n" + piso.toString())) {
             gestorArchivos.delPiso(registro);
             JOptionPane.showMessageDialog(null," --- Piso eliminado con éxito, se han actualizado los registros ---");
         }
@@ -72,9 +72,37 @@ public class GestorPisos {
     public void modPiso() {
         int registro = EntradasGui.pedirInt("Indica el numero de registro a modificar");
         Piso piso = gestorArchivos.getPiso(registro);
-        
-        if (EntradasGui.pedirBoolean("Seguro que quieres eliminar el registro " + registro + "\n" + piso.toString())) {            
-            JOptionPane.showMessageDialog(null," --- Piso modificado con éxito ---");
+        boolean modificado = false;
+        if (piso != null && EntradasGui.pedirBoolean("Seguro que quieres modificar el registro " + registro + "\n" + piso.toString())) {            
+            if(EntradasGui.pedirBoolean("¿Modificar la referencia?")){
+                piso.setReferencia(EntradasGui.pedirString("Indica la referencia (max " + Piso.MAX_SIZE_REFERENCIA + " letras)", Piso.MAX_SIZE_REFERENCIA));        
+                modificado = true;
+            }            
+            if(EntradasGui.pedirBoolean("¿Modificar el nombre del propietario?")){
+                piso.setNombrePropietario(EntradasGui.pedirString("Nombre del propietario: ", Piso.MAX_SIZE_PROPIETARIO));                        
+                modificado = true;
+            }
+            
+            if(EntradasGui.pedirBoolean("¿Modificar el Agua caliente?")){
+                piso.setAguaCaliente(EntradasGui.pedirFloat("Agua caliente: "));                        
+                modificado = true;
+            }
+
+            if(EntradasGui.pedirBoolean("¿Modificar cuota fija?")){
+                piso.setCuotaFija(EntradasGui.pedirFloat("Cuota fija:"));                        
+                modificado = true;
+            }            
+            
+            if(EntradasGui.pedirBoolean("¿Modificar calefacción?")){
+                piso.setcCalefaccion(EntradasGui.pedirFloat("Calefacción:"));                        
+                modificado = true;
+            }            
+            
+            if(modificado){
+                JOptionPane.showMessageDialog(null," --- Piso modificado con éxito ---");                
+            }else{
+                JOptionPane.showMessageDialog(null," --- No se han realizado modificaciones ---");                
+            }
         }
     }
 
