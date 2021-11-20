@@ -27,7 +27,7 @@ public class App {
             try {
                 continuar = menuAcciones(menu, gestor);
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Error en en main(): " + e.getStackTrace().toString());
+                JOptionPane.showMessageDialog(null, "Error en en main(): " + e.toString() + "\n" + e.getStackTrace().toString());
             }
         } while (continuar);
 

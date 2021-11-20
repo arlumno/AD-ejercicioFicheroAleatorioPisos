@@ -23,7 +23,7 @@ public class GestorArchivosPisos {
     private final String RUTA_FICHEROS = "src/main/java/com/mycompany/ejercicioficheroaleatoriopisos/ficheros/";
     private final String NOMBRE_FICHERO = "save.dat";
     private final String NOMBRE_FICHERO_TMP = "tmp_save.dat";
-    private final String DIA_RECIBOS = "19";
+    private final String DIA_RECIBOS = "20";
     private long maxSize;
 
     public GestorArchivosPisos(long maxSize) {
@@ -34,14 +34,16 @@ public class GestorArchivosPisos {
         File fichero = new File(RUTA_FICHEROS + NOMBRE_FICHERO);
         RandomAccessFile raf = null;
         try {
-            if (fichero.createNewFile()) {
-                JOptionPane.showMessageDialog(null, "--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
-            }
+            comprobarFichero(fichero);            
             raf = new RandomAccessFile(fichero, "rw");
-
-            int registros = calcularRegistro(raf.length());
-            long indice = registros * maxSize;
-            grabarPiso(raf, indice, piso);
+            
+            int totalRegistros = 0;            
+            if(raf.length() != 0){
+                totalRegistros = calcularRegistro(raf.length());                 
+            }
+            
+            long indiceNuevoRegistro = calcularIndice(totalRegistros + 1);
+            grabarPiso(raf, indiceNuevoRegistro, piso);
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Error al leer el fichero\n" + e.toString());
         } catch (Exception e) {
@@ -54,11 +56,16 @@ public class GestorArchivosPisos {
             }
         }
     }
-
+    private void comprobarFichero(File fichero) throws Exception{
+        if (fichero.createNewFile()) {
+                JOptionPane.showMessageDialog(null, "--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
+            }        
+    }
     public void modPiso(Piso piso, long indice) {
         File fichero = new File(RUTA_FICHEROS + NOMBRE_FICHERO);
         RandomAccessFile raf = null;
         try {
+            comprobarFichero(fichero);
             if (fichero.createNewFile()) {
                 JOptionPane.showMessageDialog(null, "--- El fichero " + NOMBRE_FICHERO + " no existe. Se ha creado uno nuevo ---");
             }
@@ -78,7 +85,7 @@ public class GestorArchivosPisos {
     }
 
     public void modPiso(Piso piso, int registro) {
-        modPiso(piso, (registro - 1) * maxSize);
+        modPiso(piso, calcularIndice(registro));
     }
 
     public void delPiso(long indiceEliminar) {
@@ -123,7 +130,7 @@ public class GestorArchivosPisos {
     }
 
     public void delPiso(int registro) {
-        delPiso((registro - 1) * maxSize);
+        delPiso(calcularIndice(registro));
     }
 
     /**
@@ -136,7 +143,7 @@ public class GestorArchivosPisos {
      * máximo
      * @throws Exception
      */
-    public long grabarPiso(RandomAccessFile raf, long indice, Piso piso) throws Exception {
+    public void grabarPiso(RandomAccessFile raf, long indice, Piso piso) throws Exception {
         raf.seek(indice);
         raf.writeChar(piso.getTipoPiso());
         raf.writeUTF(piso.getReferencia());
@@ -144,14 +151,11 @@ public class GestorArchivosPisos {
         raf.writeFloat(piso.getCuotaFija());
         raf.writeFloat(piso.getAguaCaliente());
         raf.writeFloat(piso.getcCalefaccion());
-//        JOptionPane.showMessageDialog(null, "grabarPiso(): " + piso.toString());
         if (piso instanceof Atico) {
             raf.writeFloat(((Atico) piso).getMetrosTerraza());
         } else if (piso instanceof Duplex) {
             raf.writeFloat(((Duplex) piso).getCuotaExtra());
         }
-
-        return indice + maxSize;
     }
 
     public Piso recuperarPiso(RandomAccessFile raf, long indice) throws Exception {
@@ -167,7 +171,7 @@ public class GestorArchivosPisos {
     }
 
     private Piso recuperarPiso(RandomAccessFile raf, int registro) throws Exception {
-        return recuperarPiso(raf, ((registro - 1) * maxSize));
+        return recuperarPiso(raf, calcularIndice(registro));
     }
 
     public Piso getPiso(long indice) {
@@ -175,6 +179,7 @@ public class GestorArchivosPisos {
         RandomAccessFile raf = null;
         Piso piso = null;
         try {
+            comprobarFichero(fichero);
             raf = new RandomAccessFile(fichero, "r");
             if (indice < raf.length()) {
                 piso = recuperarPiso(raf, indice);
@@ -196,7 +201,7 @@ public class GestorArchivosPisos {
     }
 
     public Piso getPiso(int registro) {
-        return getPiso(((registro - 1) * maxSize));
+        return getPiso(calcularIndice(registro));
     }
 
     private String listarPisos(boolean recibo, String filtroPropietario) {
@@ -205,9 +210,10 @@ public class GestorArchivosPisos {
         RandomAccessFile raf = null;
         Piso piso = null;
         try {
+            comprobarFichero(fichero);
             raf = new RandomAccessFile(fichero, "r");
             if (raf.length() != 0) {
-                for (long i = 0; i < raf.length(); i += maxSize) {
+                for (long i = 0 ;i < raf.length(); i += maxSize) {
                     piso = recuperarPiso(raf, i);
                     if (filtroPropietario == "" || filtroPropietario.toUpperCase().equals(piso.getNombrePropietario().toUpperCase())) {
                         listado.append("[" + calcularRegistro(i) + "] ");
@@ -222,8 +228,8 @@ public class GestorArchivosPisos {
                         }
                     }
                 }
-            } else {
-                JOptionPane.showMessageDialog(null, "Error, No hay registros no existe");
+            } else {                
+                listado.append("No hay registros");
             }
         } catch (FileNotFoundException e) {
             JOptionPane.showMessageDialog(null, "Error al leer el fichero\n" + e.toString());
@@ -253,10 +259,13 @@ public class GestorArchivosPisos {
     }
 
     public int calcularRegistro(Long indice) {
-        return (int) ceil((double) indice / (double) maxSize);
+        return ((int) ceil(((double) indice + 1) / (double) maxSize));
+    }
+    public long calcularIndice(int registro) {
+        return ((long) registro - 1) * ((long) maxSize);
     }
 
     public String buscarPisos(String propietario) {
-        return "Pisos de  " + propietario + ":\n" + listarPisos(false, propietario);
+        return listarPisos(false, propietario);
     }
 }

@@ -29,7 +29,9 @@ public abstract class Piso {
         this.aguaCaliente = aguaCaliente;
         this.cCalefaccion = cCalefaccion;
     }
-
+    
+   
+    
     public String getReferencia() {
         return referencia;
     }

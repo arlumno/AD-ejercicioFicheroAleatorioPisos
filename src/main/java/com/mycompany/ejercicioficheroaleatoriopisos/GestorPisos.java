@@ -61,7 +61,7 @@ public class GestorPisos {
     }
 
     public void bajaPiso() {
-        int registro = EntradasGui.pedirInt("Indica el numero de registro. Se pedirá confirmación");
+        int registro = EntradasGui.pedirInt("Indica el numero de registro. Se pedirá confirmación",1);
         Piso piso = gestorArchivos.getPiso(registro);
         if (piso != null && EntradasGui.pedirBoolean("Seguro que quieres eliminar el registro " + registro + "\n" + piso.toString())) {
             gestorArchivos.delPiso(registro);
@@ -70,7 +70,7 @@ public class GestorPisos {
     }
 
     public void modPiso() {
-        int registro = EntradasGui.pedirInt("Indica el numero de registro a modificar");
+        int registro = EntradasGui.pedirInt("Indica el numero de registro a modificar",1);
         Piso piso = gestorArchivos.getPiso(registro);
         boolean modificado = false;
         if (piso != null && EntradasGui.pedirBoolean("Seguro que quieres modificar el registro " + registro + "\n" + piso.toString())) {            
@@ -116,7 +116,7 @@ public class GestorPisos {
 
     public void listarPisosPropietario() {
         String propietario = EntradasGui.pedirString("Nombre de propietario a buscar:");
-        JOptionPane.showMessageDialog(null, gestorArchivos.buscarPisos(propietario));
+        JOptionPane.showMessageDialog(null, "Pisos de  " + propietario + ":\n" + gestorArchivos.buscarPisos(propietario));
     }
 
 }
